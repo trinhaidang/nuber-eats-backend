@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository} from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { User } from "./entities/user.entity";
@@ -8,22 +8,22 @@ import { User } from "./entities/user.entity";
 export class UsersService {
     constructor(
         @InjectRepository(User) private readonly users: Repository<User>
-    ) {}
+    ) { }
 
-    async createAccount({email, password, role}: CreateAccountInput): Promise<string | undefined> {
+    async createAccount({ email, password, role }: CreateAccountInput): Promise<{ ok: boolean, error?: string }> {
         try {
             //check exist user
             const exists = await this.users.findOne({ email });
-            if(exists){
+            if (exists) {
                 //make error
-                return "There is a user with that email already";
+                return { ok: false, error: "There is a user with that email already" };
             }
             // create user 
-            await this.users.save(this.users.create({email, password, role}));
-            
-        } catch(e){
+            await this.users.save(this.users.create({ email, password, role }));
+            return { ok: true };
+        } catch (e) {
             //make error
-            return "Couldn't create account";
+            return { ok: false, error: "Couldn't create account" };
         }
         // hash the password
     }
