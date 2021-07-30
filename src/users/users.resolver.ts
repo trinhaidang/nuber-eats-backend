@@ -6,6 +6,7 @@ import { LoginInput, LoginOutput } from "./dtos/login.dto";
 import { User } from "./entities/user.entity";
 import { UserService } from "./users.service";
 import { AuthUser } from "src/auth/auth-user.decorator"
+import { UserProfileInput, UserProfileOutput } from "./dtos/user-profile.dto";
 
 @Resolver(of => User)
 export class UserResolver {
@@ -36,7 +37,7 @@ export class UserResolver {
         try {
             return this.usersService.login(loginInput);
         }
-        catch(error) {
+        catch (error) {
             return {
                 ok: false,
                 error,
@@ -46,9 +47,28 @@ export class UserResolver {
 
     @Query(returns => User)
     @UseGuards(AuthGuard)
-    me(@AuthUser() authUser: User){
-        console.log(authUser);
+    me(@AuthUser() authUser: User) {
         return authUser;
+    }
+
+    @UseGuards(AuthGuard)
+    @Query(returns => UserProfileOutput)
+    async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
+        try {
+            const user = await this.usersService.findById(userProfileInput.userId);
+            if(!user) {
+                throw Error();
+            }
+            return {
+                ok: true,
+                user,
+            }
+        } catch (e) {
+            return {
+                error: "User not found",
+                ok: false,
+            }
+        }
     }
 
 }
