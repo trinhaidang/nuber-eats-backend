@@ -10,6 +10,7 @@ import { User } from './users/entities/user.entity';
 import { CommonModule } from './common/common.module';
 import { JwtModule } from './jwt/jwt.module';
 import { Jwtmiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -48,7 +49,6 @@ import { Jwtmiddleware } from './jwt/jwt.middleware';
       privateKey: process.env.PRIVATE_KEY,
     }),
     UsersModule,
-    CommonModule,
   ],
   controllers: [],
   providers: [],
