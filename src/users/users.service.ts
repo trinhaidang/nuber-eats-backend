@@ -34,12 +34,12 @@ export class UsersService {
         // hash the password
     }
 
-    async login({email, password}: LoginInput): Promise<{ ok: boolean, error?: string, token?: string }> {
+    async login({ email, password }: LoginInput): Promise<{ ok: boolean, error?: string, token?: string }> {
         // make a JWT and give it to the user
         try {
             // find the user with the email
             const user = await this.users.findOne({ email });
-            if(!user) {
+            if (!user) {
                 return {
                     ok: false,
                     error: 'User not found',
@@ -47,13 +47,13 @@ export class UsersService {
             }
             // check if the password is correct
             const passwordCorrect = await user.checkPassword(password);
-            if(!passwordCorrect) {
+            if (!passwordCorrect) {
                 return {
                     ok: false,
                     error: 'Wrong password',
                 };
             }
-            const token = this.jwtService.sign({id:user.id});
+            const token = this.jwtService.sign(user.id);
             return {
                 ok: true,
                 token,

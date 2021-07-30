@@ -5,8 +5,8 @@ import { CONFIG_OPTIONS } from './jwt.constants';
 
 @Injectable()
 export class JwtService {
-    constructor(@Inject(CONFIG_OPTIONS) private readonly options: JwtModuleOptions) {}
-    sign(payload:object): string {
-        return jwt.sign(payload, this.options.privateKey);
+    constructor(@Inject(CONFIG_OPTIONS) private readonly options: JwtModuleOptions) { }
+    sign(userId: number): string {
+        return jwt.sign({ id: userId }, this.options.privateKey);
     }
 }
