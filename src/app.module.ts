@@ -3,11 +3,13 @@ import * as Joi from 'joi';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RestaurantsModule } from './restaurants/restaurants.module';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { CommonModule } from './common/common.module';
 import { JwtModule } from './jwt/jwt.module';
-import { jwtMiddleware } from './jwt/jwt.middleware';
+import { Jwtmiddleware } from './jwt/jwt.middleware';
 
 @Module({
   imports: [
@@ -52,5 +54,8 @@ import { jwtMiddleware } from './jwt/jwt.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer:MiddlewareConsumer){
+    consumer
+      .apply(Jwtmiddleware)
+      .forRoutes({ path:'/graphql', method:RequestMethod.ALL,})
   }
 }
