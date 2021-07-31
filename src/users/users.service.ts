@@ -34,7 +34,7 @@ export class UserService {
             // verify
             await this.verifications.save(
                 this.verifications.create({
-                user,
+                    user,
                 }),
             )
             return { ok: true };
@@ -87,11 +87,24 @@ export class UserService {
         if (email) {
             user.email = email;
             user.verified = false;
-            await this.verifications.save(this.verifications.create({user}));
+            await this.verifications.save(this.verifications.create({ user }));
         }
         if (password) {
             user.password = password;
         }
         return this.users.save(user);
+    }
+
+    async verifyEmail(code: string): Promise<boolean> {
+        const verification = await this.verifications.findOne(
+            { code },
+            { relations: ['user'] },
+        );
+        if (verification) {
+            verification.user.verified = true;
+            this.users.save(verification.user);
+            return true;
+        }
+        return false;
     }
 }
