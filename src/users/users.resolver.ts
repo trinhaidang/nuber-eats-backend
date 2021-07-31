@@ -79,31 +79,13 @@ export class UserResolver {
         @AuthUser() authUser: User,
         @Args('input') editProfileinput: EditProfileInput,
     ): Promise<EditProfileOutput> {
-        try {
-            await this.usersService.editProfile(authUser.id, editProfileinput);
-            return {
-                ok: true,
-            };
-        } catch (error) {
-            return {
-                ok: false,
-                error,
-            };
-        }
+        return this.usersService.editProfile(authUser.id, editProfileinput);
     }
 
     @Mutation(returns => VerifyEmailOutput)
-    async verifyEmail(@Args('input') verifyEmailInput: VerifyEmailInput): Promise<VerifyEmailOutput>{
-        try {
-            this.usersService.verifyEmail(verifyEmailInput.code);
-            return {
-                ok:true,
-            };
-        } catch (error) {
-            return {
-                ok:false,
-                error,
-            };
-        }
+    verifyEmail(
+        @Args('input') {code}: VerifyEmailInput
+    ): Promise<VerifyEmailOutput>{
+        return this.usersService.verifyEmail(code);
     } 
 }

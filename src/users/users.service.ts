@@ -7,8 +7,9 @@ import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from "./entities/user.entity";
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
-import { EditProfileInput } from './dtos/edit-profile.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
+import { VerifyEmailOutput } from './dtos/verify-email.dto';
 
 @Injectable()
 export class UserService {
@@ -86,20 +87,36 @@ export class UserService {
     }
 
     async editProfile(userid: number, { email, password }: EditProfileInput,
-    ): Promise<User> {
-        const user = await this.users.findOne(userid);
-        if (email) {
-            user.email = email;
-            user.verified = false;
-            await this.verifications.save(this.verifications.create({ user }));
+    ): Promise<EditProfileOutput> {
+        try {
+            const user = await this.users.findOne(userid);
+            if(!user){
+                return {
+                    ok: false,
+                    error: 'User Not Found.',
+                };
+            }
+            if (email) {
+                user.email = email;
+                user.verified = false;
+                await this.verifications.save(this.verifications.create({ user }));
+            }
+            if (password) {
+                user.password = password;
+            }
+            this.users.save(user);
+            return {
+                ok: true
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            };
         }
-        if (password) {
-            user.password = password;
-        }
-        return this.users.save(user);
     }
 
-    async verifyEmail(code: string): Promise<boolean> {
+    async verifyEmail(code: string): Promise<VerifyEmailOutput> {
         try {
             const verification = await this.verifications.findOne(
                 { code },
@@ -108,12 +125,17 @@ export class UserService {
             if (verification) {
                 verification.user.verified = true;
                 this.users.save(verification.user);
-                return true;
+                return { ok: true };
             }
-            throw new Error();
-        } catch (e) {
-            console.log(e);
-            return false;
+            return {
+                ok: false,
+                error: 'Verification not found.'
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            };
         }
     }
 }
