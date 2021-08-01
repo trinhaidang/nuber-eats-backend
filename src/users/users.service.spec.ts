@@ -28,17 +28,19 @@ describe("UserService", () => {
 
     let service: UserService;
     let usersRepository: MockRepository<User>;
+    let verificationRepository: MockRepository<Verification>;
+    let mailService: MailService;
 
     beforeAll(async () => {
         const module = await Test.createTestingModule({
             providers: [
-                UserService, 
+                UserService,
                 {
-                    provide: getRepositoryToken(User), 
+                    provide: getRepositoryToken(User),
                     useValue: mockRepository()
                 },
                 {
-                    provide: getRepositoryToken(Verification), 
+                    provide: getRepositoryToken(Verification),
                     useValue: mockRepository()
                 },
                 {
@@ -52,7 +54,9 @@ describe("UserService", () => {
             ],
         }).compile();
         service = module.get<UserService>(UserService);
+        mailService = module.get<MailService>(MailService);
         usersRepository = module.get(getRepositoryToken(User));
+        verificationRepository = module.get(getRepositoryToken(Verification));
     });
 
     it('should be defined', () => {
@@ -62,8 +66,8 @@ describe("UserService", () => {
     describe("createAccount", () => {
 
         const createAccountArgs = {
-            email: '',
-            password: '',
+            email: 'user@mock.com',
+            password: 'mock123',
             role: 0,
         };
 
@@ -74,19 +78,32 @@ describe("UserService", () => {
             });
             const result = await service.createAccount(createAccountArgs);
             expect(result).toMatchObject({
-                ok: false, 
-                error: "There is a user with that email already", 
+                ok: false,
+                error: "There is a user with that email already",
             });
         });
 
         it('should create a new user', async () => {
             usersRepository.findOne.mockResolvedValue(undefined);
             usersRepository.create.mockReturnValue(createAccountArgs);
-            await service.createAccount(createAccountArgs);
+            usersRepository.save.mockResolvedValue(createAccountArgs);
+            verificationRepository.create.mockReturnValue({user:createAccountArgs});
+            verificationRepository.save.mockResolvedValue({ code: 'code' });
+            const result = await service.createAccount(createAccountArgs);
             expect(usersRepository.create).toHaveBeenCalledTimes(1);
             expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
             expect(usersRepository.save).toHaveBeenCalledTimes(1);
             expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
+            expect(verificationRepository.create).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.create).toHaveBeenCalledWith({ user: createAccountArgs, });
+            expect(verificationRepository.save).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.save).toHaveBeenCalledWith({user:createAccountArgs});
+            expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+            expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
+                expect.any(String),
+                expect.any(String),
+            );
+            expect(result).toEqual({ ok: true });
         });
     });
 
