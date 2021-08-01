@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as jwt from 'jsonwebtoken';
-import { CreateAccountInput } from './dtos/create-account.dto';
+import { CreateAccountInput, CreateAccountOutput } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from "./entities/user.entity";
 import { ConfigService } from '@nestjs/config';
@@ -10,6 +10,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verification.entity';
 import { VerifyEmailOutput } from './dtos/verify-email.dto';
+import { UserProfileOutput } from './dtos/user-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,7 @@ export class UserService {
     ) {
     }
 
-    async createAccount({ email, password, role }: CreateAccountInput): Promise<{ ok: boolean, error?: string }> {
+    async createAccount({ email, password, role }: CreateAccountInput): Promise<CreateAccountOutput> {
         try {
             //check exist user
             const exists = await this.users.findOne({ email });
@@ -46,7 +47,7 @@ export class UserService {
         // hash the password
     }
 
-    async login({ email, password }: LoginInput): Promise<{ ok: boolean, error?: string, token?: string }> {
+    async login({ email, password }: LoginInput): Promise<LoginOutput> {
         // make a JWT and give it to the user
         try {
             // find the user with the email
@@ -82,8 +83,26 @@ export class UserService {
         }
     }
 
-    async findById(id: number): Promise<User> {
-        return this.users.findOne({ id });
+    async findById(id: number): Promise<UserProfileOutput> {
+        try {
+            const user = await this.users.findOne({ id });
+            if(!user) {
+                return {
+                    ok: false,
+                    error: 'User Not Found.',
+                };
+            } else {
+                return {
+                    ok: true,
+                    user
+                };
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error
+            };
+        }
     }
 
     async editProfile(userid: number, { email, password }: EditProfileInput,
@@ -125,6 +144,7 @@ export class UserService {
             if (verification) {
                 verification.user.verified = true;
                 this.users.save(verification.user);
+                this.verifications.delete(verification.id);
                 return { ok: true };
             }
             return {

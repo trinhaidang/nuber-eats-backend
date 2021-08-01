@@ -24,27 +24,12 @@ export class UserResolver {
     @Mutation(returns => CreateAccountOutput)
     async createAccount(@Args("input") createAccountInput: CreateAccountInput
     ): Promise<CreateAccountOutput> {
-        try {
-            return this.usersService.createAccount(createAccountInput);
-        } catch (error) {
-            return {
-                ok: false,
-                error,
-            };
-        }
+        return this.usersService.createAccount(createAccountInput);
     }
 
     @Mutation(returns => LoginOutput)
     async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
-        try {
-            return this.usersService.login(loginInput);
-        }
-        catch (error) {
-            return {
-                ok: false,
-                error,
-            };
-        }
+        return this.usersService.login(loginInput);
     }
 
     @Query(returns => User)
@@ -55,22 +40,10 @@ export class UserResolver {
 
     @UseGuards(AuthGuard)
     @Query(returns => UserProfileOutput)
-    async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
-        try {
-            const user = await this.usersService.findById(userProfileInput.userId);
-            if (!user) {
-                throw Error();
-            }
-            return {
-                ok: true,
-                user,
-            };
-        } catch (e) {
-            return {
-                error: "User not found",
-                ok: false,
-            };
-        }
+    async userProfile(
+        @Args() userProfileInput: UserProfileInput
+    ): Promise<UserProfileOutput> {
+        return this.usersService.findById(userProfileInput.userId);
     }
 
     @UseGuards(AuthGuard)
@@ -84,8 +57,8 @@ export class UserResolver {
 
     @Mutation(returns => VerifyEmailOutput)
     verifyEmail(
-        @Args('input') {code}: VerifyEmailInput
-    ): Promise<VerifyEmailOutput>{
+        @Args('input') { code }: VerifyEmailInput
+    ): Promise<VerifyEmailOutput> {
         return this.usersService.verifyEmail(code);
-    } 
+    }
 }
