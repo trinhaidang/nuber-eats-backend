@@ -261,6 +261,15 @@ describe("UserService", () => {
             expect(result).toEqual({ ok: true });
         });
 
+        it('should fail if user not found', async () => {
+            usersRepository.findOne.mockResolvedValue(undefined);
+            const result = await service.editProfile(1, {email:''});
+            expect(result).toEqual({
+                ok: false,
+                error: 'User Not Found.',
+            });
+        });
+
         it('should fail on exception', async () => {
             usersRepository.findOne.mockRejectedValue(new Error());
             const result = await service.editProfile(1, { email: 'fail@mock.com' });
@@ -295,7 +304,7 @@ describe("UserService", () => {
             expect(verificationRepository.delete).toHaveBeenCalledTimes(1);
             expect(verificationRepository.delete).toHaveBeenCalledWith(mockedVerification.id);
 
-            expect(result).toEqual({ok: true});
+            expect(result).toEqual({ ok: true });
         });
 
         it('should fail on verification not found', async () => {
@@ -308,7 +317,7 @@ describe("UserService", () => {
         });
 
         it('should fail on exception', async () => {
-                verificationRepository.findOne.mockRejectedValue(new Error());
+            verificationRepository.findOne.mockRejectedValue(new Error());
             const result = await service.verifyEmail('');
             expect(result).toEqual({
                 ok: false,
