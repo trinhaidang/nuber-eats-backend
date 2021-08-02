@@ -72,7 +72,6 @@ export class UserService {
                     error: 'Wrong password',
                 };
             }
-            console.log(user);
             const token = this.jwtService.sign(user.id);
             return {
                 ok: true,
@@ -81,29 +80,22 @@ export class UserService {
         } catch (error) {
             return {
                 ok: false,
-                error,
+                error: 'Can\'t login',
             };
         }
     }
 
     async findById(id: number): Promise<UserProfileOutput> {
         try {
-            const user = await this.users.findOne({ id });
-            if(!user) {
-                return {
-                    ok: false,
-                    error: 'User Not Found.',
-                };
-            } else {
-                return {
-                    ok: true,
-                    user
-                };
-            }
+            const user = await this.users.findOneOrFail({ id });
+            return {
+                ok: true,
+                user
+            };
         } catch (error) {
             return {
                 ok: false,
-                error
+                error: 'User Not Found',
             };
         }
     }
@@ -112,7 +104,7 @@ export class UserService {
     ): Promise<EditProfileOutput> {
         try {
             const user = await this.users.findOne(userid);
-            if(!user){
+            if (!user) {
                 return {
                     ok: false,
                     error: 'User Not Found.',
