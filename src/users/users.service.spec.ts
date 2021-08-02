@@ -202,7 +202,51 @@ describe("UserService", () => {
             });
         });
     });
-    it.todo('editProfile');
+
+    describe('editProfile', () => {
+
+        it('should change email', async () => {
+            const oldUser = {
+                email: 'bs@old.com',
+                verified: true
+            };
+            const editprofileArgs = {
+                userId: 1,
+                input: { email: 'bs@new.com' },
+            };
+            const newVerification = {
+                code: 'code',
+            };
+            const newUser = {
+                verified: false,
+                email: editprofileArgs.input.email
+            }
+
+            usersRepository.findOne.mockResolvedValue(oldUser);
+            verificationRepository.create.mockReturnValue(newVerification);
+            verificationRepository.save.mockReturnValue(newVerification);
+
+            await service.editProfile(editprofileArgs.userId, editprofileArgs.input);
+
+            expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+            expect(usersRepository.findOne).toHaveBeenCalledWith(editprofileArgs.userId);
+
+            expect(verificationRepository.create).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.create).toHaveBeenCalledWith({ user: newUser });
+
+            // expect(verificationRepository.save).toHaveBeenCalledTimes(1);
+            expect(verificationRepository.save).toHaveBeenCalledWith(newVerification);
+
+            // expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+            expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(newUser.email, newVerification.code);
+        });
+
+        it('should change password', async () => {
+
+        });
+
+    });
+
     it.todo('verifyEmail');
 });
 
