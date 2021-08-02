@@ -9,7 +9,7 @@ export class MailService {
     constructor(@Inject(CONFIG_OPTIONS) private readonly options: MailModuleOptions) {
     }
 
-    private async sendEmail(subject: string, template: string, to: string, emailVars: EmailVar[]) {
+    async sendEmail(subject: string, template: string, to: string, emailVars: EmailVar[]) {
         const form = new FormData();
         form.append('from', `TrinhDA from Yum <mailgun@${this.options.domain}>`);
         form.append('subject', subject);
