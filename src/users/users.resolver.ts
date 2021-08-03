@@ -30,6 +30,8 @@ export class UserResolver {
     @Mutation(returns => LoginOutput)
     async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
         return this.usersService.login(loginInput);
+        //nico@las.com 12345
+        //trinhaidang@gmail.com 121212
     }
 
     @Query(returns => User)

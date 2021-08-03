@@ -110,9 +110,17 @@ export class UserService {
                     error: 'User Not Found.',
                 };
             }
+            const exist = await this.users.findOne({ email });
+            if (exist) {
+                return {
+                    ok: false,
+                    error: 'There is a user with that email already',
+                };
+            }
             if (email) {
                 user.email = email;
                 user.verified = false;
+                await this.verifications.delete({ user: { id: user.id } });
                 const verification = await this.verifications.save(this.verifications.create({ user }));
                 this.mailService.sendVerificationEmail(user.email, verification.code);
             }

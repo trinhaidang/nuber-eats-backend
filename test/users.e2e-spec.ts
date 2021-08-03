@@ -13,11 +13,12 @@ jest.mock('got', () => {
 });
 
 const GRAPHQL_ENDPOINT = '/graphql';
-
 const testUser = {
   email: "nico@las.com",
   password: "12345",
 }
+const NEW_EMAIL = 'nico@las1.com';
+const NEW_PASSWORD = '123451';
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication;
@@ -210,9 +211,9 @@ describe('UserModule (e2e)', () => {
         `
         }).expect(200)
         .expect(res => {
-          const { body: { data: { me: { email }}}} = res;
+          const { body: { data: { me: { email } } } } = res;
           expect(email).toBe(testUser.email);
-        })
+        });
     });
 
     it('should not allow logged out user', () => {
@@ -227,7 +228,7 @@ describe('UserModule (e2e)', () => {
         `
         }).expect(200)
         .expect(res => {
-          const { body: { errors }} = res;
+          const { body: { errors } } = res;
           const [error] = errors;
           expect(error.message).toBe("Forbidden resource");
         })
@@ -235,7 +236,74 @@ describe('UserModule (e2e)', () => {
 
   });
 
-  it.todo('verifyEmail');
-  it.todo('editProfile');
+  describe('editProfile', () => {
+    it('should fail if email already exists', () => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+            mutation{
+              editProfile(input:{
+                email:"${testUser.email}"
+              }){
+                ok
+                error
+              }
+            }
+            `
+        }).expect(200)
+        .expect(res => {
+          const { body: { data: { editProfile: { ok, error } } } } = res;
+          expect(ok).toBe(false);
+          expect(error).toBe("There is a user with that email already");
+        })
+    });
+
+    it('should change email', () => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT)
+        .set("X-JWT", jwtToken)
+        .send({
+          query: `
+            mutation{
+              editProfile(input:{
+                email:"${NEW_EMAIL}"
+              }){
+                ok
+                error
+              }
+            }
+            `
+        }).expect(200)
+        .expect(res => {
+          const { body: { data: { editProfile: { ok, error } } } } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should have new email', () => {
+      return request(app.getHttpServer()).post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+          {
+            me {
+              email
+            }
+          }
+        `
+        }).expect(200)
+        .expect(res => {
+          const { body: { data: { me: { email } } } } = res;
+          expect(email).toBe(NEW_EMAIL);
+        });
+    });
+
+  });
+
+
+  describe('verifyEmail', () => {
+
+  });
 
 });
