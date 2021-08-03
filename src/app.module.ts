@@ -62,6 +62,7 @@ import { Category } from './restaurants/entities/category.entity';
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
     UsersModule,
+    RestaurantsModule,
   ],
   controllers: [],
   providers: [],
