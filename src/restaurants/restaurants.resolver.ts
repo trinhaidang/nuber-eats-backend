@@ -1,5 +1,5 @@
 import { SetMetadata } from "@nestjs/common";
-import { Args, Int, Mutation, Query, ResolveField, Resolver } from "@nestjs/graphql";
+import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
 import { AuthUser } from "src/auth/auth-user.decorator";
 import { Role } from "src/auth/role.decorator";
 import { CoreOutput } from "src/common/dtos/output.dto";
@@ -62,8 +62,9 @@ export class CategoryResolver {
     constructor(private readonly restaurantService: RestaurantService) { }
 
     @ResolveField(type => Int) // fields not in database
-    restaurantCount(): number {
-        return 1;
+    restaurantCount(@Parent() category: Category): Promise<number> { //parent field
+        console.log(category)
+        return this.restaurantService.countRestaurant(category);
     }
 
     @Query(type => AllCategoriesOutput)
