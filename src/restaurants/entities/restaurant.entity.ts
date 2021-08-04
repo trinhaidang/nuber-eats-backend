@@ -5,7 +5,7 @@ import { User } from "src/users/entities/user.entity";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { Category } from "./category.entity";
 
-@InputType('RestaurantInputType',{ isAbstract: true })
+@InputType('RestaurantInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Restaurant extends CoreEntity {
@@ -30,14 +30,15 @@ export class Restaurant extends CoreEntity {
     @ManyToOne(
         type => Category,
         category => category.restaurants,
-        { nullable: true, onDelete:'SET NULL' }
+        { nullable: true, onDelete: 'SET NULL' }
     )
     category: Category;
 
     @Field(type => User)
     @ManyToOne(
         type => User,
-        user => user.restaurants
+        user => user.restaurants,
+        { onDelete: 'CASCADE' }
     )
     owner: User;
 }
