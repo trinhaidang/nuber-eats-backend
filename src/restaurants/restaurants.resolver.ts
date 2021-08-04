@@ -17,11 +17,11 @@ export class RestaurantResolver {
     // @SetMetadata("role", UserRole.Owner)
     @Role(['Owner'])
     async createRestaurant(
-        @AuthUser() authUser: User,
+        @AuthUser() owner: User,
         @Args('input') createRestaurantInput: CreateRestaurantInput
     ): Promise<CreateRestaurantOutput> {
         return this.restaurantService.createRestaurant(
-            authUser,
+            owner,
             createRestaurantInput
         );
     }
@@ -29,11 +29,11 @@ export class RestaurantResolver {
     @Mutation(returns => EditRestaurantOutput)
     @Role(['Owner'])
     editRestaurant(
-        @AuthUser() authUser: User,
+        @AuthUser() owner: User,
         @Args('input') editRestaurantInput: EditRestaurantInput
     ): Promise<EditRestaurantOutput> {
         return this.restaurantService.editRestaurant(
-            authUser, 
+            owner, 
             editRestaurantInput
         );
     }
