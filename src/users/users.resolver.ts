@@ -1,4 +1,4 @@
-import { UseGuards } from "@nestjs/common";
+import { SetMetadata, UseGuards } from "@nestjs/common";
 import { Resolver, Query, Mutation, Args, Context } from "@nestjs/graphql";
 import { AuthGuard } from "src/auth/auth.guard";
 import { CreateAccountInput, CreateAccountOutput } from "./dtos/create-account.dto";
@@ -33,9 +33,11 @@ export class UserResolver {
         return this.usersService.login(loginInput);
         //nico@las.com 12345
         //trinhaidang@gmail.com 121212
+        // admin@admin.com 123
     }
 
     @Query(returns => User)
+    // @SetMetadata('roles','Any')
     @Role(['Any'])
     me(@AuthUser() authUser: User) {
         return authUser;

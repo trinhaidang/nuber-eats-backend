@@ -2,27 +2,25 @@
 
 The Backend of Nuber Eats Clone
 
-## User Entity:
-
-- id
-- createdAt
-- updatedAt
-
-- email
-- password
-- role(client|owner|delivery)
-
 ## User CRUD:
 
-- Create Account
-- Log In
-- See Profile
-- Edit Profile
-- Verify Email
+- Create Account (createAccount)
+- Log In (login)
+- See Profile (userProfile)
+- Edit Profile (editProfile)
+- Verify Email (verifyEmail)
 
-## Restaurant Model
+## Restaurant CRUD:
 
-- name
-- category
-- address
-- coverImage
+- See Categories
+- See Restaurants by Category (pagination)
+- See Restaurants (pagination)
+- See Restaurant
+
+- Create Restaurant
+- Edit Restaurant
+- Delete Restaurant
+
+- Create Dish
+- Edit Dish
+- Delete Dish
