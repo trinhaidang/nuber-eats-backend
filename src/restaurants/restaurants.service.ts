@@ -4,6 +4,7 @@ import { CoreOutput } from "src/common/dtos/output.dto";
 import { User } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 import { AllCategoriesOutput } from "./dtos/all-categories.dto";
+import { CategoryInput, CategoryOutput } from "./dtos/category.dto";
 import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/create-restaurant.dto";
 import { DeleteRestaurantInput } from "./dtos/delete-restaurant.dto";
 import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/edit-restaurant.dto";
@@ -108,13 +109,13 @@ export class RestaurantService {
     /**************** -- CATEGORY SERVICES -- ********************/
 
     async allCategories(): Promise<AllCategoriesOutput> {
-        try { 
+        try {
             const categories = await this.categories.find();
-            return { 
+            return {
                 ok: true,
                 categories
-            }; 
-        } catch (error) { 
+            };
+        } catch (error) {
             return {
                 ok: false,
                 error: 'Could not load categories',
@@ -122,7 +123,31 @@ export class RestaurantService {
         }
     }
 
-    countRestaurant(category:Category) {
-        return this.restaurants.count({category});
+    countRestaurant(category: Category) {
+        return this.restaurants.count({ category });
+    }
+
+    async findCategoryBySlug({ slug }: CategoryInput): Promise<CategoryOutput> {
+        try {
+            const category = await this.categories.findOne(
+                { slug },
+                { relations: ['restaurants'] }
+            );
+            if (!category) {
+                return {
+                    ok: false,
+                    error: 'Category not found'
+                }
+            }
+            return {
+                ok: true,
+                category
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not load Category'
+            };
+        }
     }
 }
