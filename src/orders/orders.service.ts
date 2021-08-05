@@ -9,6 +9,7 @@ import { Restaurant } from "src/restaurants/entities/restaurant.entity";
 import { OrderItem } from "./entities/order-item.entity";
 import { Dish } from "src/restaurants/entities/dish.entity";
 import { GetOrdersInput, GetOrdersOutput } from "./dtos/get-orders.dto";
+import { GetOrderInput, GetOrderOutput } from "./dtos/get-order.dto";
 
 
 @Injectable()
@@ -118,22 +119,34 @@ export class OrderService {
             let orders: Order[];
             if (user.role === UserRole.Client) {
                 orders = await this.orders.find({
-                    where: { customer: user }
+                    where: {
+                        customer: user,
+                        ...(status && { status })
+                    },
                 });
             } else if (user.role === UserRole.Delivery) {
                 orders = await this.orders.find({
-                    where: { driver: user }
+                    where: {
+                        driver: user,
+                        ...(status && { status })
+                    },
                 });
             } else if (user.role === UserRole.Owner) {
                 const restaurants = await this.restaurants.find(
                     {
-                        where: { owner: user },
+                        where: {
+                            owner: user,
+                            // ...(status && { status })
+                        },
                         relations: ['orders'],
-                    }
+                    },
                 );
                 console.log(restaurants);
                 orders = this.flatDeep(restaurants.map(restaurant => restaurant.orders));
-                
+                if(status) {
+                    orders = orders.filter(order => order.status === status);
+                }
+
             }
 
             return {
@@ -145,6 +158,38 @@ export class OrderService {
             return {
                 ok: false,
                 error: 'Could not get orders',
+            };
+        }
+    }
+
+    async getOrder(user:User, {id: orderId}: GetOrderInput): Promise<GetOrderOutput>{
+        try {
+            const order = await this.orders.findOne(orderId, {
+                relations: ['restaurant'],
+            });
+            if(!order) {
+                return {
+                    ok: false,
+                    error: 'Order not found.'
+                };
+            }
+            if( order.customerId !== user.id
+                && order.driverId !== user.id
+                && order.restaurant.ownerId !== user.id
+            ) {
+                return {
+                    ok: false,
+                    error: "You can't see that"
+                };
+            }
+            return {
+                ok: true,
+                order
+            };
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not get order',
             };
         }
     }
