@@ -153,7 +153,9 @@ export class RestaurantService {
         }
     }
 
-    async searchRestaurantByName({ query, page }: SearchRestaurantInput): Promise<SearchRestaurantOutput> {
+    async searchRestaurantByName(
+        { query, page }: SearchRestaurantInput
+    ): Promise<SearchRestaurantOutput> {
         try {
             const [restaurants, totalResults] = await this.restaurants.findAndCount({
                 where: {
