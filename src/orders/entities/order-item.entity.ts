@@ -8,8 +8,8 @@ import { Column, Entity, ManyToOne, RelationId, OneToMany, ManyToMany, JoinTable
 export class OrderItemOption {
     @Field(type => String)
     name: string;
-    @Field(type => DishChoice, { nullable: true })
-    choice?: DishChoice;
+    @Field(type => String, { nullable: true })  // => type => DishChoice json
+    choice?: string;
     @Field(type => Int, { nullable: true })
     extra?: number;
 }

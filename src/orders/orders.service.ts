@@ -31,12 +31,13 @@ export class OrderService {
                     error: 'Restaurant not found'
                 };
             }
-
-            const order = await this.orders.save(this.orders.create({
-                customer,
-                restaurant,
-            }));
-            console.log(order);
+            items.forEach(item => console.log(item.options));
+            console.log(items);
+            // const order = await this.orders.save(this.orders.create({
+            //     customer,
+            //     restaurant,
+            // }));
+            // console.log(order);
             // return { ok: true };
         } catch (error) {
             return {
