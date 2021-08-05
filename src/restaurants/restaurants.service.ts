@@ -2,16 +2,18 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CoreOutput } from "src/common/dtos/output.dto";
 import { User } from "src/users/entities/user.entity";
-import { Repository, Like, Raw } from "typeorm";
-import { AllCategoriesOutput } from "./dtos/all-categories.dto";
-import { CategoryInput, CategoryOutput } from "./dtos/category.dto";
-import { CreateDishInput, CreateDishOutput } from "./dtos/create-dish.dto";
-import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/create-restaurant.dto";
-import { DeleteRestaurantInput } from "./dtos/delete-restaurant.dto";
-import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/edit-restaurant.dto";
-import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant.dto";
-import { RestaurantsInput, RestaurantsOutput } from "./dtos/restaurants.dto";
-import { SearchRestaurantInput, SearchRestaurantOutput } from "./dtos/search-restaurant.dto";
+import { Repository, Raw } from "typeorm";
+import { AllCategoriesOutput } from "./dtos/category/all-categories.dto";
+import { CategoryInput, CategoryOutput } from "./dtos/category/category.dto";
+import { CreateDishInput, CreateDishOutput } from "./dtos/dish/create-dish.dto";
+import { DeleteDishInput, DeleteDishOutput } from "./dtos/dish/delete-dish.dto";
+import { EditDishInput, EditDishOutput } from "./dtos/dish/edit-dish.dto";
+import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/restaurant/create-restaurant.dto";
+import { DeleteRestaurantInput, DeleteRestaurantOutput } from "./dtos/restaurant/delete-restaurant.dto";
+import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/restaurant/edit-restaurant.dto";
+import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant/restaurant.dto";
+import { RestaurantsInput, RestaurantsOutput } from "./dtos/restaurant/restaurants.dto";
+import { SearchRestaurantInput, SearchRestaurantOutput } from "./dtos/restaurant/search-restaurant.dto";
 import { Category } from "./entities/category.entity";
 import { Dish } from "./entities/dish.entity";
 import { Restaurant } from "./entities/restaurant.entity";
@@ -90,7 +92,7 @@ export class RestaurantService {
         }
     }
 
-    async deleteRestaurant(owner: User, { restaurantId }: DeleteRestaurantInput): Promise<CoreOutput> {
+    async deleteRestaurant(owner: User, { restaurantId }: DeleteRestaurantInput): Promise<DeleteRestaurantOutput> {
         try {
             const restaurant = await this.restaurants.findOne(restaurantId);
             if (!restaurant) {
@@ -253,7 +255,7 @@ export class RestaurantService {
             if (owner.id !== restaurant.ownerId) {
                 return {
                     ok: false,
-                    error: "You can't do that."
+                    error: "You can't do that." 
                 };
             }
             await this.dishes.save(this.dishes.create(
@@ -272,4 +274,72 @@ export class RestaurantService {
             }
         }
     }
+
+
+    async editDish(
+        owner: User,
+        editDishInput: EditDishInput
+    ): Promise<EditDishOutput> {
+        try {
+            const dish = await this.dishes.findOne(editDishInput.dishId,{relations:['restaurant']});
+            if (!dish) {
+                return {
+                    ok: false,
+                    error: 'Dish not found'
+                };
+            }
+            if (owner.id !== dish.restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: "You can't do that." 
+                };
+            }
+            await this.dishes.save([
+                { 
+                    id: editDishInput.dishId,
+                    ...editDishInput,
+                }
+            ]);
+            return {
+                ok: true,
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not edit dish'
+            }
+        }
+    }
+
+
+    async deleteDish(
+        owner: User,
+        {dishId}: DeleteDishInput
+    ): Promise<DeleteDishOutput> {
+        try {
+            const dish = await this.dishes.findOne(dishId, {relations:['restaurant']});
+            if (!dish) {
+                return {
+                    ok: false,
+                    error: 'Dish not found'
+                };
+            }
+            if (owner.id !== dish.restaurant.ownerId) {
+                return {
+                    ok: false,
+                    error: "You can't do that." 
+                };
+            }  
+            await this.dishes.delete(dishId);
+            return {
+                ok: true,
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not delete dish'
+            }
+        }
+    }
+
 }

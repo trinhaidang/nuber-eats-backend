@@ -1,18 +1,18 @@
-import { SetMetadata } from "@nestjs/common";
 import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
 import { AuthUser } from "src/auth/auth-user.decorator";
 import { Role } from "src/auth/role.decorator";
-import { CoreOutput } from "src/common/dtos/output.dto";
-import { User, UserRole } from "src/users/entities/user.entity";
-import { AllCategoriesOutput } from "./dtos/all-categories.dto";
-import { CategoryInput, CategoryOutput } from "./dtos/category.dto";
-import { CreateDishInput, CreateDishOutput } from "./dtos/create-dish.dto";
-import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/create-restaurant.dto";
-import { DeleteRestaurantInput, DeleteRestaurantOutput } from "./dtos/delete-restaurant.dto";
-import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/edit-restaurant.dto";
-import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant.dto";
-import { RestaurantsInput, RestaurantsOutput } from "./dtos/restaurants.dto";
-import { SearchRestaurantInput, SearchRestaurantOutput } from "./dtos/search-restaurant.dto";
+import { User } from "src/users/entities/user.entity";
+import { AllCategoriesOutput } from "./dtos/category/all-categories.dto";
+import { CategoryInput, CategoryOutput } from "./dtos/category/category.dto";
+import { CreateDishInput, CreateDishOutput } from "./dtos/dish/create-dish.dto";
+import { DeleteDishInput, DeleteDishOutput } from "./dtos/dish/delete-dish.dto";
+import { EditDishInput, EditDishOutput } from "./dtos/dish/edit-dish.dto";
+import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/restaurant/create-restaurant.dto";
+import { DeleteRestaurantInput, DeleteRestaurantOutput } from "./dtos/restaurant/delete-restaurant.dto";
+import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/restaurant/edit-restaurant.dto";
+import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant/restaurant.dto";
+import { RestaurantsInput, RestaurantsOutput } from "./dtos/restaurant/restaurants.dto";
+import { SearchRestaurantInput, SearchRestaurantOutput } from "./dtos/restaurant/search-restaurant.dto";
 import { Category } from "./entities/category.entity";
 import { Dish } from "./entities/dish.entity";
 import { Restaurant } from "./entities/restaurant.entity";
@@ -85,8 +85,10 @@ export class RestaurantResolver {
 
 
 /**************** -- CATEGORY RESOLVER -- ********************/
+
 @Resolver(of => Category)
 export class CategoryResolver {
+
     constructor(private readonly restaurantService: RestaurantService) { }
 
     @ResolveField(type => Int) // fields not in database
@@ -111,8 +113,10 @@ export class CategoryResolver {
 
 
 /**************** -- DISH RESOLVER -- ********************/
+
 @Resolver(of => Dish)
 export class DishResolver {
+
     constructor(private readonly restaurantService: RestaurantService) { }
 
     @Mutation(type => CreateDishOutput)
@@ -122,6 +126,24 @@ export class DishResolver {
         @Args('input') createDishInput: CreateDishInput
     ): Promise<CreateDishOutput> {
         return this.restaurantService.createDish(owner, createDishInput);
+    }
+
+    @Mutation(type => EditDishOutput)
+    @Role(['Owner'])
+    editDish(
+        @AuthUser() owner: User,
+        @Args('input') editDishInput: EditDishInput
+    ): Promise<EditDishOutput> {
+        return this.restaurantService.editDish(owner, editDishInput);
+    }
+
+    @Mutation(type => DeleteDishOutput)
+    @Role(['Owner'])
+    deleteDish(
+        @AuthUser() owner: User,
+        @Args('input') deleteDishInput: DeleteDishInput
+    ): Promise<DeleteDishOutput> {
+        return this.restaurantService.deleteDish(owner, deleteDishInput);
     }
 
 }
