@@ -4,10 +4,11 @@ import { Order } from "./entities/order.entity";
 import { Repository } from "typeorm";
 import { Mutation } from "@nestjs/graphql";
 import { CreateOrderInput, CreateOrderOutput } from "./dtos/create-order.dto";
-import { User } from "src/users/entities/user.entity";
+import { User, UserRole } from "src/users/entities/user.entity";
 import { Restaurant } from "src/restaurants/entities/restaurant.entity";
 import { OrderItem } from "./entities/order-item.entity";
 import { Dish } from "src/restaurants/entities/dish.entity";
+import { GetOrdersInput, GetOrdersOutput } from "./dtos/get-orders.dto";
 
 
 @Injectable()
@@ -23,6 +24,10 @@ export class OrderService {
         @InjectRepository(Restaurant)
         private readonly restaurants: Repository<Restaurant>,
     ) { }
+
+    flatDeep(array, level = 1) {
+        return level > 0 ? array.reduce((acc, val) => acc.concat(Array.isArray(val) ? this.flatDeep(val, level - 1) : val), []) : array.slice();
+    };
 
     async createOrder(
         customer: User,
@@ -67,8 +72,8 @@ export class OrderService {
                             const dishOptionChoice = dishOption.choices.find(
                                 dishOptionChoice => dishOptionChoice.name === itemOption.choice,
                             );
-                            if(dishOptionChoice){
-                                if(dishOptionChoice.extra){
+                            if (dishOptionChoice) {
+                                if (dishOptionChoice.extra) {
                                     console.log(`${dishOptionChoice.name} + $USD ${dishOptionChoice.extra}`)
                                     dishFinalPrice = dishFinalPrice + dishOptionChoice.extra;
                                 }
@@ -78,7 +83,7 @@ export class OrderService {
 
                 }
                 orderFinalPrice = orderFinalPrice + dishFinalPrice;
-                
+
                 // create item
                 const orderItem = await this.orderItems.save(this.orderItems.create({
                     dish,
@@ -96,14 +101,50 @@ export class OrderService {
             }));
             console.log(order);
 
-            return { 
-                ok: true 
+            return {
+                ok: true
             };
 
         } catch (error) {
             return {
                 ok: false,
                 error: 'Could not create order',
+            };
+        }
+    }
+
+    async getOrders(user: User, { status }: GetOrdersInput): Promise<GetOrdersOutput> {
+        try {
+            let orders: Order[];
+            if (user.role === UserRole.Client) {
+                orders = await this.orders.find({
+                    where: { customer: user }
+                });
+            } else if (user.role === UserRole.Delivery) {
+                orders = await this.orders.find({
+                    where: { driver: user }
+                });
+            } else if (user.role === UserRole.Owner) {
+                const restaurants = await this.restaurants.find(
+                    {
+                        where: { owner: user },
+                        relations: ['orders'],
+                    }
+                );
+                console.log(restaurants);
+                orders = this.flatDeep(restaurants.map(restaurant => restaurant.orders));
+                
+            }
+
+            return {
+                ok: true,
+                orders
+            };
+
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not get orders',
             };
         }
     }
