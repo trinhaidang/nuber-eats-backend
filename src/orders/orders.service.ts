@@ -167,25 +167,36 @@ export class OrderService {
             const order = await this.orders.findOne(orderId, {
                 relations: ['restaurant'],
             });
+
             if(!order) {
                 return {
                     ok: false,
                     error: 'Order not found.'
                 };
             }
-            if( order.customerId !== user.id
-                && order.driverId !== user.id
-                && order.restaurant.ownerId !== user.id
-            ) {
+
+            let canSee = true;
+            if(user.role === UserRole.Client && order.customerId !== user.id){
+                canSee = false;
+            }
+            if(user.role === UserRole.Delivery && order.driverId !== user.id){
+                canSee = false;
+            }
+            if(user.role === UserRole.Owner && order.restaurant.ownerId !== user.id){
+                canSee = false;
+            }
+            if(!canSee){
                 return {
                     ok: false,
                     error: "You can't see that"
                 };
             }
+
             return {
                 ok: true,
                 order
             };
+            
         } catch (error) {
             return {
                 ok: false,
