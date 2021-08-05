@@ -5,6 +5,7 @@ import { User } from "src/users/entities/user.entity";
 import { Repository, Like, Raw } from "typeorm";
 import { AllCategoriesOutput } from "./dtos/all-categories.dto";
 import { CategoryInput, CategoryOutput } from "./dtos/category.dto";
+import { CreateDishInput, CreateDishOutput } from "./dtos/create-dish.dto";
 import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/create-restaurant.dto";
 import { DeleteRestaurantInput } from "./dtos/delete-restaurant.dto";
 import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/edit-restaurant.dto";
@@ -134,7 +135,10 @@ export class RestaurantService {
 
     async findRestaurantById({ restaurantId }: RestaurantInput): Promise<RestaurantOutput> {
         try {
-            const restaurant = await this.restaurants.findOne(restaurantId);
+            const restaurant = await this.restaurants.findOne(
+                restaurantId,
+                { relations: ['menu'] }
+            );
             if (!restaurant) {
                 return {
                     ok: false,
@@ -225,6 +229,21 @@ export class RestaurantService {
                 ok: false,
                 error: 'Could not load Category'
             };
+        }
+    }
+
+
+    /**************** -- DISH SERVICES -- ********************/
+
+    async createDish(owner: User, createDishInput: CreateDishInput): Promise<CreateDishOutput>{
+        try {
+            return {
+                ok: true,
+            }
+        }catch(error) {
+            return {
+                ok: false,
+            }
         }
     }
 }
