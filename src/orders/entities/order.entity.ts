@@ -39,7 +39,7 @@ export class Order extends CoreEntity {
     @ManyToOne(
         type => Restaurant,
         restaurant => restaurant.orders,
-        {onDelete:'CASCADE'}
+        { onDelete: 'CASCADE' }
     )
     restaurant: Restaurant;
 
@@ -48,12 +48,12 @@ export class Order extends CoreEntity {
     @JoinTable()     // @JoinTable() only own table: order
     dishes: Dish[];
 
-    @Field(type => Float)
-    @Column()
-    total: number;
+    @Column({ nullable: true })
+    @Field(type => Float, { nullable: true })
+    total?: number;
 
-    @Field(type => OrderStatus)
     @Column({ type: 'enum', enum: OrderStatus })
+    @Field(type => OrderStatus)
     status: OrderStatus;
 
 }
