@@ -23,6 +23,7 @@ export class OrderService {
         {restaurantId, items}: CreateOrderInput
     ): Promise<CreateOrderOutput> {
         try {
+            // get restaurant
             const restaurant = await this.restaurants.findOne(restaurantId);
             if(!restaurant) {
                 return {
@@ -31,7 +32,12 @@ export class OrderService {
                 };
             }
 
-            return { ok: true };
+            const order = await this.orders.save(this.orders.create({
+                customer,
+                restaurant,
+            }));
+            console.log(order);
+            // return { ok: true };
         } catch (error) {
             return {
                 ok: false,

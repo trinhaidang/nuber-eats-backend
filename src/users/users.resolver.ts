@@ -32,8 +32,15 @@ export class UserResolver {
     async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
         return this.usersService.login(loginInput);
         //nico@las.com 12345
-        //trinhaidang@gmail.com 121212
-        // admin@admin.com 123
+        // nico@customer.com 121212 client
+        // {
+        //     "X-JWT":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiaWF0IjoxNjI4MTYxMTkwfQ.hjCzNuEQGl6aIQB7V1BmdXQ67BctHdBWdRir9I-lBQM"
+        // }
+        // admin@admin.com 123 owner
+        // {
+        //     "X-JWT":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiaWF0IjoxNjI4MDYwMTM1fQ.ipqZNxm4XuIA39zGp-wfWtUw8qgMZVdg24YnijgVt70"
+        //  }
+
     }
 
     @Query(returns => User)
