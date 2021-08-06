@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Order } from "./entities/order.entity";
+import { Order, OrderStatus } from "./entities/order.entity";
 import { Repository } from "typeorm";
 import { Mutation } from "@nestjs/graphql";
 import { CreateOrderInput, CreateOrderOutput } from "./dtos/create-order.dto";
@@ -10,6 +10,7 @@ import { OrderItem } from "./entities/order-item.entity";
 import { Dish } from "src/restaurants/entities/dish.entity";
 import { GetOrdersInput, GetOrdersOutput } from "./dtos/get-orders.dto";
 import { GetOrderInput, GetOrderOutput } from "./dtos/get-order.dto";
+import { EditOrderInput, EditOrderOutput } from "./dtos/edit-order.dto";
 
 
 @Injectable()
@@ -29,6 +30,49 @@ export class OrderService {
     flatDeep(array, level = 1) {
         return level > 0 ? array.reduce((acc, val) => acc.concat(Array.isArray(val) ? this.flatDeep(val, level - 1) : val), []) : array.slice();
     };
+
+    checkOrderPrivilege(user: User, order: Order): boolean {
+        let havePrivilege = false;
+
+        if (user.role === UserRole.Client && order.customerId === user.id) {
+            havePrivilege = true;
+        }
+        else if (user.role === UserRole.Delivery && order.driverId === user.id) {
+            havePrivilege = true;
+        }
+        else if (user.role === UserRole.Owner && order.restaurant.ownerId === user.id) {
+            havePrivilege = true;
+        }
+
+        return havePrivilege;
+    }
+
+    checkOrderStatusUpdatePrivilege2(role: UserRole, status: OrderStatus): boolean {
+        let canUpdate = false;
+        if (role === UserRole.Owner
+            && (status === OrderStatus.Cooking || status === OrderStatus.Cooked)) {
+            canUpdate = true;
+        }
+        if (role === UserRole.Delivery
+            && (status === OrderStatus.PickedUp || status === OrderStatus.Delivered)) {
+            canUpdate = true;
+        }
+        return canUpdate;
+    }
+
+    checkOrderStatusUpdatePrivilege(role: UserRole, status: OrderStatus): boolean {
+        let canUpdate = true;
+        if (role === UserRole.Client) canUpdate = false;
+        if (role === UserRole.Owner) {
+            if (status !== OrderStatus.Cooking && status !== OrderStatus.Cooked)
+                canUpdate = false;
+        }
+        if (role === UserRole.Delivery) {
+            if (status !== OrderStatus.PickedUp && status !== OrderStatus.Delivered)
+                canUpdate = false;
+        }
+        return canUpdate;
+    }
 
     async createOrder(
         customer: User,
@@ -143,7 +187,7 @@ export class OrderService {
                 );
                 console.log(restaurants);
                 orders = this.flatDeep(restaurants.map(restaurant => restaurant.orders));
-                if(status) {
+                if (status) {
                     orders = orders.filter(order => order.status === status);
                 }
 
@@ -162,30 +206,27 @@ export class OrderService {
         }
     }
 
-    async getOrder(user:User, {id: orderId}: GetOrderInput): Promise<GetOrderOutput>{
+    async getOrder(user: User, { id: orderId }: GetOrderInput): Promise<GetOrderOutput> {
         try {
             const order = await this.orders.findOne(orderId, {
                 relations: ['restaurant'],
             });
 
-            if(!order) {
+            if (!order) {
                 return {
                     ok: false,
                     error: 'Order not found.'
                 };
             }
 
-            let canSee = true;
-            if(user.role === UserRole.Client && order.customerId !== user.id){
-                canSee = false;
+            if (!order.restaurant) {
+                return {
+                    ok: false,
+                    error: 'Restaurant not found.'
+                };
             }
-            if(user.role === UserRole.Delivery && order.driverId !== user.id){
-                canSee = false;
-            }
-            if(user.role === UserRole.Owner && order.restaurant.ownerId !== user.id){
-                canSee = false;
-            }
-            if(!canSee){
+
+            if (!this.checkOrderPrivilege(user, order)) {
                 return {
                     ok: false,
                     error: "You can't see that"
@@ -196,11 +237,52 @@ export class OrderService {
                 ok: true,
                 order
             };
-            
+
         } catch (error) {
             return {
                 ok: false,
                 error: 'Could not get order',
+            };
+        }
+    }
+
+    async editOrder(user: User, { id: orderId, status }: EditOrderInput): Promise<EditOrderOutput> {
+        try {
+            const order = await this.orders.findOne(orderId, { relations: ['restaurant'] });
+            if (!order) {
+                return {
+                    ok: false,
+                    error: 'Order not found'
+                };
+            }
+
+            if (!order.restaurant) {
+                return {
+                    ok: false,
+                    error: 'Restaurant not found.'
+                };
+            }
+
+            if (this.checkOrderPrivilege(user, order)) {
+                if (this.checkOrderStatusUpdatePrivilege(user.role, status)) {
+                    await this.orders.save({
+                        id: orderId,
+                        status,
+                    });
+                    return {
+                        ok: true
+                    }
+                }
+            }
+            return {
+                ok: false,
+                error: "You can't edit that"
+            };
+
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not edit order.',
             };
         }
     }
