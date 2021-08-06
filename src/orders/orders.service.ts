@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Order, OrderStatus } from "./entities/order.entity";
 import { Repository } from "typeorm";
-import { Mutation } from "@nestjs/graphql";
 import { CreateOrderInput, CreateOrderOutput } from "./dtos/create-order.dto";
 import { User, UserRole } from "src/users/entities/user.entity";
 import { Restaurant } from "src/restaurants/entities/restaurant.entity";
