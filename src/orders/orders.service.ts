@@ -188,7 +188,6 @@ export class OrderService {
                 if (status) {
                     orders = orders.filter(order => order.status === status);
                 }
-
             }
 
             return {
