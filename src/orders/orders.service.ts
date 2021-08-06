@@ -246,7 +246,7 @@ export class OrderService {
         }
     }
 
-    async editOrder(user: User, { id: orderId, status }: EditOrderInput): Promise<EditOrderOutput> {
+    async updateOrderStatus(user: User, { id: orderId, status }: EditOrderInput): Promise<EditOrderOutput> {
         try {
             const order = await this.orders.findOne(orderId, { relations: ['restaurant'] });
             if (!order) {

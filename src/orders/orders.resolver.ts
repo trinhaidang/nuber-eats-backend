@@ -48,7 +48,7 @@ export class OrderResolver {
         @AuthUser() user: User,
         @Args('input') editOrderInput: EditOrderInput
     ): Promise<EditOrderOutput> {
-        return this.ordersServices.editOrder(user, editOrderInput);
+        return this.ordersServices.updateOrderStatus(user, editOrderInput);
     }
 
 }
