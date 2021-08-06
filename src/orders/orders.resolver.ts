@@ -19,7 +19,7 @@ export class OrderResolver {
     constructor(
         private readonly ordersServices: OrderService,
         @Inject(PUB_SUB) private readonly pubSub: PubSub,
-    ) {}
+    ) { }
 
     @Mutation(returns => CreateOrderOutput)
     @Role(['Client'])
@@ -28,7 +28,7 @@ export class OrderResolver {
         @Args('input') createOrderInput: CreateOrderInput
     ): Promise<CreateOrderOutput> {
         return this.ordersServices.createOrder(customer, createOrderInput);
-    }   
+    }
 
     @Query(type => GetOrdersOutput)
     @Role(['Any'])
@@ -68,13 +68,14 @@ export class OrderResolver {
 
 
     @Subscription(returns => String, {
-        filter: ({readyPotato}, {potatoId}) => {
+        filter: ({ readyPotato }, { potatoId }) => {
             return (readyPotato === potatoId);
         },
+        resolve: ({readyPotato}) => `Your potato with the id ${readyPotato} is ready!`,
     })
     @Role(['Any'])
-    readyPotato(@Args('potatoId') potatoId: number) {  
-        return this.pubSub.asyncIterator('hotPotatos'); 
+    readyPotato(@Args('potatoId') potatoId: number) {
+        return this.pubSub.asyncIterator('hotPotatos');
     }
 
 }
