@@ -33,7 +33,6 @@ export class OrderService {
 
     checkOrderPrivilege(user: User, order: Order): boolean {
         let havePrivilege = false;
-
         if (user.role === UserRole.Client && order.customerId === user.id) {
             havePrivilege = true;
         }
