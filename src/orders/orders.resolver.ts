@@ -64,8 +64,15 @@ export class OrderResolver {
 
     //listening
     @Subscription(returns => String)
-    readyPotato() {  //payload key
+    msg() {  //payload key
         return pubsub.asyncIterator('hotPotatos');  //trigger = triggerName
+    }
+
+    @Subscription(returns => String)
+    @Role(['Any'])
+    readyPotato(@AuthUser() user: User) {  
+        console.log(user);
+        return pubsub.asyncIterator('hotPotatos'); 
     }
 
 }
