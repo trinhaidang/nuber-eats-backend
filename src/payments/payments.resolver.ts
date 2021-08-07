@@ -12,11 +12,11 @@ export class PaymentResolver {
     constructor(private readonly paymentService: PaymentService) { }
 
     @Mutation(returns => CreatePaymentOutput)
-    @Role(['Client'])
+    @Role(['Owner'])
     createPayment(
-        @AuthUser() user: User,
+        @AuthUser() owner: User,
         @Args('input') createPaymentInput: CreatePaymentInput
     ): Promise<CreatePaymentOutput>{
-        return this.paymentService.createPayment(user, createPaymentInput);
+        return this.paymentService.createPayment(owner, createPaymentInput);
     }
 } 
