@@ -29,6 +29,7 @@ export class Payment extends CoreEntity {
        // { onDelete: 'SET NULL', nullable: true, eager: true }
     )
     restaurant: Restaurant;
+    @Field(type => Int)
     @RelationId((payment: Payment) => payment.restaurant)
     restaurantId: number;
 
