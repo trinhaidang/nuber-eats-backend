@@ -73,7 +73,7 @@ export class PaymentService {
     checkForPayments() {
         console.log('Checking for payments...(cron)');
         const job = this.schedulerRegistry.getCronJob('myjob');
-        console.log(job);
+        job.stop();
     }
 
     @Interval(5000)  // run after each 5s
