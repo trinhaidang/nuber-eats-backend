@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Payment } from "./entities/payment.entity";
-import { Repository } from "typeorm";
+import { Repository, LessThan } from "typeorm";
 import { User } from "src/users/entities/user.entity";
 import { CreatePaymentInput, CreatePaymentOutput } from "./dtos/create-payment.dto";
 import { Restaurant } from "src/restaurants/entities/restaurant.entity";
 import { GetPaymentsOutput } from "./dtos/get-payments.dto";
 import { Cron, Interval, Timeout, SchedulerRegistry } from '@nestjs/schedule';
+import { PROMOTE_DURATION_DAYS } from "src/common/common.constants";
 
 @Injectable()
 export class PaymentService {
@@ -38,7 +39,7 @@ export class PaymentService {
             // promote and set until 7 days after
             restaurant.isPromoted = true;
             const date = new Date();
-            date.setDate(date.getDate() + 7);
+            date.setDate(date.getDate() + PROMOTE_DURATION_DAYS);
             restaurant.promotedUntil = date;
             this.restaurants.save(restaurant);
 
@@ -75,6 +76,23 @@ export class PaymentService {
         }
     }
 
+    // ----- check expired promoted --------
+    //@Interval(2000) // run every 2s
+    @Cron('* * 12 * * *') // run every day at 12:00
+    async checkPromotedRestaurants() {
+        const restaurants = await this.restaurants.find(
+            { 
+                isPromoted: true,
+                promotedUntil: LessThan(new Date()),
+            });
+        console.log('cronjob');
+        console.log(restaurants);
+        restaurants.forEach(async (restaurant) => {
+            restaurant.isPromoted = false;
+            restaurant.promotedUntil = null;
+            await this.restaurants.save(restaurant);
+        });
+    }
 
 
 
