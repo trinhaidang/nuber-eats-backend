@@ -148,7 +148,7 @@ export class OrderService {
             console.log(order);
             await this.pubSub.publish(
                 NEW_PENDING_ORDER,
-                { pendingOrders: order }
+                { pendingOrders: { order, ownerId: restaurant.ownerId } }
             );
 
             return {
