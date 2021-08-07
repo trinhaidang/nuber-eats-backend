@@ -69,11 +69,11 @@ export class OrderResolver {
 
 
     @Subscription(returns => Order, {
-        filter: ({pendingOrders: {ownerId}}, _, {user}) => {
+        filter: ({ pendingOrders: { ownerId } }, _, { user }) => {
             console.log(ownerId, user.id);
             return ownerId === user.id;
         },
-        resolve: ({pendingOrders: {order}}) => order,
+        resolve: ({ pendingOrders: { order } }) => order,
     })
     @Role(['Owner'])
     pendingOrders() {
@@ -87,9 +87,20 @@ export class OrderResolver {
     }
 
 
-    @Subscription(returns => Order)
+    @Subscription(returns => Order, {
+        filter: (
+            { orderUpdates: order }: { orderUpdates: Order },
+            { input }: { input: OrderUpdatesInput },
+            { user }: { user: User },
+        ) => {
+            if(order.driverId !== user.id 
+                && order.customerId !== user.id
+                && order.restaurant.ownerId !== user.id) return false;
+            return order.id === input.id;
+        }
+    })
     @Role(['Any'])
-    orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput ) {
+    orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput) {
         return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
     }
 
