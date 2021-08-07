@@ -29,14 +29,18 @@ export class UserResolver {
     @Mutation(returns => LoginOutput)
     async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
         return this.usersService.login(loginInput);
-        //nico@las.com 12345
+        
+        // driver@delivery.com 12345
+        // {
+        //     "x-jwt":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiaWF0IjoxNjI4MzQwNDg3fQ.bH9I1P2wAk678V145NCfDUp_F_t9JmClblGhx9n8wPY"
+        // }
         // nico@customer.com 121212 client
         // {
-        //     "X-JWT":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiaWF0IjoxNjI4MTYxMTkwfQ.hjCzNuEQGl6aIQB7V1BmdXQ67BctHdBWdRir9I-lBQM"
+        //     "x-jwt":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiaWF0IjoxNjI4MTYxMTkwfQ.hjCzNuEQGl6aIQB7V1BmdXQ67BctHdBWdRir9I-lBQM"
         // }
         // admin@admin.com 123 owner
         // {
-        //     "X-JWT":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiaWF0IjoxNjI4MDYwMTM1fQ.ipqZNxm4XuIA39zGp-wfWtUw8qgMZVdg24YnijgVt70"
+        //     "x-jwt":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiaWF0IjoxNjI4MDYwMTM1fQ.ipqZNxm4XuIA39zGp-wfWtUw8qgMZVdg24YnijgVt70"
         //  }
 
     }
