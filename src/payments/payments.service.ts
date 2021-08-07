@@ -5,6 +5,7 @@ import { Repository } from "typeorm";
 import { User } from "src/users/entities/user.entity";
 import { CreatePaymentInput, CreatePaymentOutput } from "./dtos/create-payment.dto";
 import { Restaurant } from "src/restaurants/entities/restaurant.entity";
+import { GetPaymentsOutput } from "./dtos/get-payments.dto";
 
 
 
@@ -50,6 +51,21 @@ export class PaymentService {
                 ok: false,
                 error: 'Could not create payment'
             };
+        }
+    }
+
+    async getPayments(owner: User): Promise<GetPaymentsOutput>{
+        try {
+            const payments = await this.payments.find({user: owner});
+            return {
+                ok: true,
+                payments
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not get payments'
+            }
         }
     }
 
