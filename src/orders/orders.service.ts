@@ -12,6 +12,7 @@ import { GetOrderInput, GetOrderOutput } from "./dtos/get-order.dto";
 import { EditOrderInput, EditOrderOutput } from "./dtos/edit-order.dto";
 import { NEW_COOKED_ORDER, NEW_ORDER_UPDATE, NEW_PENDING_ORDER, PUB_SUB } from "src/common/common.constants";
 import { PubSub } from "graphql-subscriptions";
+import { TakeOrderInput, TakeOrderOutput } from "./dtos/take-order.dto";
 
 
 @Injectable()
@@ -275,11 +276,11 @@ export class OrderService {
                         if (status === OrderStatus.Cooked) {
                             await this.pubSub.publish(
                                 NEW_COOKED_ORDER,
-                                { cookedOrders: newOrder}
+                                { cookedOrders: newOrder }
                             );
                         }
                     }
-                    await this.pubSub.publish(NEW_ORDER_UPDATE, {orderUpdates: newOrder});
+                    await this.pubSub.publish(NEW_ORDER_UPDATE, { orderUpdates: newOrder });
                     return {
                         ok: true
                     }
@@ -294,6 +295,48 @@ export class OrderService {
             return {
                 ok: false,
                 error: 'Could not edit order.',
+            };
+        }
+    }
+
+    async takeOrder(driver: User, { id: orderId }: TakeOrderInput): Promise<TakeOrderOutput> {
+        try {
+            const order = await this.orders.findOne(orderId);
+            if (!order) {
+                return {
+                    ok: false,
+                    error: 'Order not found',
+                }
+            }
+            if (!order.restaurant) {
+                return {
+                    ok: false,
+                    error: 'Restaurant not found.'
+                };
+            }
+            if (order.driver) {
+                return {
+                    ok: false,
+                    error: 'This order already has a driver'
+                };
+            }
+
+            await this.orders.save({
+                id: orderId,
+                driver,
+            })
+            await this.pubSub.publish(
+                NEW_ORDER_UPDATE,
+                { orderUpdates: { ...order, driver } }
+            );
+            return {
+                ok: true
+            };
+
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not take order'
             };
         }
     }
