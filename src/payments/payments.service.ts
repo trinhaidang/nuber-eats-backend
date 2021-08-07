@@ -16,7 +16,7 @@ export class PaymentService {
         private readonly payments: Repository<Payment>,
         @InjectRepository(Restaurant)
         private readonly restaurants: Repository<Restaurant>,
-        private readonly schedulerRegistry: SchedulerRegistry,
+        // private readonly schedulerRegistry: SchedulerRegistry,
     ) { }
 
     async createPayment(owner: User, { transactionId, restaurantId }: CreatePaymentInput
@@ -35,6 +35,12 @@ export class PaymentService {
                     error: 'You are not allowed to do this.'
                 };
             }
+            // promote and set until 7 days after
+            restaurant.isPromoted = true;
+            const date = new Date();
+            date.setDate(date.getDate() + 7);
+            restaurant.promotedUntil = date;
+            this.restaurants.save(restaurant);
 
             await this.payments.save(this.payments.create({
                 transactionId,
@@ -69,21 +75,26 @@ export class PaymentService {
         }
     }
 
-    @Cron('30 * * * * *', { name: "myjob" }) // run at the second 30 of every min
-    checkForPayments() {
-        console.log('Checking for payments...(cron)');
-        const job = this.schedulerRegistry.getCronJob('myjob');
-        job.stop();
-    }
 
-    @Interval(5000)  // run after each 5s
-    checkForPayments1() {
-        console.log('Checking for payments...(interval)');
-    }
 
-    @Timeout(20000)  // run once after start app 20s
-    checkForPayments2() {
-        console.log('Checking for payments...(timeout)');
-    }
+
+    // -------------- CRON JOB EX --------------
+
+    // @Cron('30 * * * * *', { name: "myjob" }) // run at the second 30 of every min
+    // checkForPayments() {
+    //     console.log('Checking for payments...(cron)');
+    //     const job = this.schedulerRegistry.getCronJob('myjob');
+    //     job.stop();
+    // }
+
+    // @Interval(5000)  // run after each 5s
+    // checkForPayments1() {
+    //     console.log('Checking for payments...(interval)');
+    // }
+
+    // @Timeout(20000)  // run once after start app 20s
+    // checkForPayments2() {
+    //     console.log('Checking for payments...(timeout)');
+    // }
 
 }

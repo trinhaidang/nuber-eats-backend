@@ -44,14 +44,8 @@ export class Restaurant extends CoreEntity {
         { onDelete: 'CASCADE' }
     )
     owner: User;
-    @RelationId((restaurant: Restaurant) => restaurant.owner )
+    @RelationId((restaurant: Restaurant) => restaurant.owner)
     ownerId: number;
-
-    @Field(type => [Dish])
-    @OneToMany(
-        type => Dish,
-        dish => dish.restaurant)
-    menu: Dish[];
 
     @Field(type => [Order])
     @OneToMany(
@@ -59,6 +53,20 @@ export class Restaurant extends CoreEntity {
         order => order.restaurant
     )
     orders: Order[];
+
+    @Field(type => [Dish])
+    @OneToMany(
+        type => Dish,
+        dish => dish.restaurant)
+    menu: Dish[];
+
+    @Field(type => Boolean)
+    @Column({ default: false })
+    isPromoted: boolean;
+
+    @Field(type => Date, { nullable: true })
+    @Column({ nullable: true })
+    promotedUntil?: Date;
 
 
     // @Field(type => [Payment])
