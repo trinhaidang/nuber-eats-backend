@@ -5,3 +5,7 @@ export const PROMOTE_DURATION_DAYS = 7;
 export const NEW_PENDING_ORDER = 'NEW_PENDING_ORDER';
 export const NEW_COOKED_ORDER = 'NEW_COOKED_ORDER';
 export const NEW_ORDER_UPDATE = 'NEW_ORDER_UPDATE';
+
+export const RESTAURANT_PAGE_SIZE = 6;
+
+export const CATEGORY_PAGE_SIZE = 6;

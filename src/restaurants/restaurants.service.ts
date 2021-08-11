@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { RESTAURANT_PAGE_SIZE, CATEGORY_PAGE_SIZE } from "src/common/common.constants";
 import { CoreOutput } from "src/common/dtos/output.dto";
 import { User } from "src/users/entities/user.entity";
 import { Repository, Raw } from "typeorm";
@@ -119,8 +120,8 @@ export class RestaurantService {
         try {
             const [restaurants, totalResults] = await this.restaurants.findAndCount(
                 {
-                    take: 25,
-                    skip: (page - 1) * 25,
+                    take: RESTAURANT_PAGE_SIZE,
+                    skip: (page - 1) * RESTAURANT_PAGE_SIZE,
                     order: {
                         isPromoted: 'DESC',
                     },
@@ -130,7 +131,7 @@ export class RestaurantService {
             return {
                 ok: true,
                 results: restaurants,
-                totalPages: Math.ceil(totalResults / 25),
+                totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
                 totalResults,
             }
         } catch (error) {
@@ -174,12 +175,12 @@ export class RestaurantService {
                 where: {
                     name: Raw(name => `${name} ILIKE '%${query}%'`),
                 },
-                take: 25,
-                skip: (page - 1) / 25,
+                take: RESTAURANT_PAGE_SIZE,
+                skip: (page - 1) / RESTAURANT_PAGE_SIZE,
             });
             return {
                 ok: true,
-                totalPages: Math.ceil(totalResults / 25),
+                totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
                 totalResults,
                 restaurants
             }
@@ -223,8 +224,8 @@ export class RestaurantService {
             }
             const restaurants = await this.restaurants.find({
                 where: { category },
-                take: 25,
-                skip: (page - 1) * 25,
+                take: CATEGORY_PAGE_SIZE,
+                skip: (page - 1) * CATEGORY_PAGE_SIZE,
                 order: {
                     isPromoted: 'DESC',
                 }
@@ -234,7 +235,7 @@ export class RestaurantService {
             return {
                 ok: true,
                 category,
-                totalPages: Math.ceil(totalResults / 25)
+                totalPages: Math.ceil(totalResults / CATEGORY_PAGE_SIZE)
             };
         } catch (error) {
             return {
