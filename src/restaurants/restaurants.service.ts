@@ -231,12 +231,14 @@ export class RestaurantService {
                     isPromoted: 'DESC',
                 }
             });
-            category.restaurants = restaurants;
+            // category.restaurants = restaurants;
             const totalResults = await this.countRestaurant(category);
             return {
                 ok: true,
                 category,
-                totalPages: Math.ceil(totalResults / CATEGORY_PAGE_SIZE)
+                totalPages: Math.ceil(totalResults / CATEGORY_PAGE_SIZE),
+                totalResults,
+                restaurants
             };
         } catch (error) {
             return {
