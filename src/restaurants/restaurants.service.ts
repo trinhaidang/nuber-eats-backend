@@ -123,7 +123,8 @@ export class RestaurantService {
                     skip: (page - 1) * 25,
                     order: {
                         isPromoted: 'DESC',
-                    }
+                    },
+                    relations: ['category'],
                 }
             )
             return {
