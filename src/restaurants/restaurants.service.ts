@@ -172,6 +172,7 @@ export class RestaurantService {
     ): Promise<SearchRestaurantOutput> {
         try {
             const [restaurants, totalResults] = await this.restaurants.findAndCount({
+                relations: ['category'],
                 where: {
                     name: Raw(name => `${name} ILIKE '%${query}%'`),
                 },
