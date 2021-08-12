@@ -177,8 +177,12 @@ export class RestaurantService {
                     name: Raw(name => `${name} ILIKE '%${query}%'`),
                 },
                 take: RESTAURANT_PAGE_SIZE,
-                skip: (page - 1) / RESTAURANT_PAGE_SIZE,
+                skip: (page - 1) * RESTAURANT_PAGE_SIZE,
+                order: {
+                    isPromoted: 'DESC',
+                },
             });
+            console.log("aaaaaa",restaurants, totalResults);
             return {
                 ok: true,
                 totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
