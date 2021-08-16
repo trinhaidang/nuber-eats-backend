@@ -197,6 +197,37 @@ export class RestaurantService {
         }
     }
 
+    async myRestaurants(
+        owner: User,
+        { page }: RestaurantsInput
+    ): Promise<RestaurantsOutput> {
+        try {
+            const [restaurants, totalResults] = await this.restaurants.findAndCount(
+                {
+                    where: {owner: owner},
+                    take: RESTAURANT_PAGE_SIZE,
+                    skip: (page - 1) * RESTAURANT_PAGE_SIZE,
+                    order: {
+                        isPromoted: 'DESC',
+                    },
+                    relations: ['category'],
+                }
+            )
+            return {
+                ok: true,
+                results: restaurants,
+                totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
+                totalResults,
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not find restaurants.',
+            }
+        }
+
+    }
+
     /**************** -- CATEGORY SERVICES -- ********************/
 
     async allCategories(): Promise<AllCategoriesOutput> {
