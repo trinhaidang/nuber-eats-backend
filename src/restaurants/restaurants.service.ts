@@ -12,6 +12,7 @@ import { EditDishInput, EditDishOutput } from "./dtos/dish/edit-dish.dto";
 import { CreateRestaurantInput, CreateRestaurantOutput } from "./dtos/restaurant/create-restaurant.dto";
 import { DeleteRestaurantInput, DeleteRestaurantOutput } from "./dtos/restaurant/delete-restaurant.dto";
 import { EditRestaurantInput, EditRestaurantOutput } from "./dtos/restaurant/edit-restaurant.dto";
+import { MyRestaurantInput, MyRestaurantOutput } from "./dtos/restaurant/my-restaurant.dto";
 import { RestaurantInput, RestaurantOutput } from "./dtos/restaurant/restaurant.dto";
 import { RestaurantsInput, RestaurantsOutput } from "./dtos/restaurant/restaurants.dto";
 import { SearchRestaurantInput, SearchRestaurantOutput } from "./dtos/restaurant/search-restaurant.dto";
@@ -37,15 +38,26 @@ export class RestaurantService {
         createRestaurantInput: CreateRestaurantInput,
     ): Promise<CreateRestaurantOutput> {
         try {
+
+            const exist = await this.restaurants.findOne({ where: { name: createRestaurantInput.name } });
+            if (exist) {
+                return {
+                    ok: false,
+                    error: "Restaurant exists!"
+                };
+            }
+
             const newRestaurant = this.restaurants.create(createRestaurantInput);
 
             newRestaurant.owner = owner;
             const category = await this.categories.getOrCreate(createRestaurantInput.categoryName);
             newRestaurant.category = category;
 
+            console.log(newRestaurant);
             await this.restaurants.save(newRestaurant);
             return {
                 ok: true,
+                restaurantId: newRestaurant.id,
             };
         } catch (error) {
             console.log(error);
@@ -132,7 +144,7 @@ export class RestaurantService {
                 ok: true,
                 results: restaurants,
                 totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
-                totalResults,
+                totalResults: totalResults || 0,
             }
         } catch (error) {
             return {
@@ -182,11 +194,10 @@ export class RestaurantService {
                     isPromoted: 'DESC',
                 },
             });
-            console.log("aaaaaa",restaurants, totalResults);
             return {
                 ok: true,
                 totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
-                totalResults,
+                totalResults: totalResults || 0,
                 restaurants
             }
         } catch (error) {
@@ -197,6 +208,8 @@ export class RestaurantService {
         }
     }
 
+    //  -------- OWNER
+
     async myRestaurants(
         owner: User,
         { page }: RestaurantsInput
@@ -204,7 +217,7 @@ export class RestaurantService {
         try {
             const [restaurants, totalResults] = await this.restaurants.findAndCount(
                 {
-                    where: {owner: owner},
+                    where: { owner: owner },
                     take: RESTAURANT_PAGE_SIZE,
                     skip: (page - 1) * RESTAURANT_PAGE_SIZE,
                     order: {
@@ -217,7 +230,7 @@ export class RestaurantService {
                 ok: true,
                 results: restaurants,
                 totalPages: Math.ceil(totalResults / RESTAURANT_PAGE_SIZE),
-                totalResults,
+                totalResults: totalResults || 0,
             }
         } catch (error) {
             return {
@@ -225,7 +238,21 @@ export class RestaurantService {
                 error: 'Could not find restaurants.',
             }
         }
+    }
 
+    async myRestaurant(owner: User, { id }: MyRestaurantInput): Promise<MyRestaurantOutput> {
+        try {
+            const restaurant = await this.restaurants.findOne({owner, id});
+            return {
+                ok: true,
+                restaurant,
+            }
+        } catch (error) {
+            return {
+                ok: false,
+                error: 'Could not find restaurant.',
+            }
+        }
     }
 
     /**************** -- CATEGORY SERVICES -- ********************/
@@ -301,12 +328,12 @@ export class RestaurantService {
             if (owner.id !== restaurant.ownerId) {
                 return {
                     ok: false,
-                    error: "You can't do that." 
+                    error: "You can't do that."
                 };
             }
             await this.dishes.save(this.dishes.create(
-                { 
-                    ...createDishInput, 
+                {
+                    ...createDishInput,
                     restaurant
                 }
             ));
@@ -327,7 +354,7 @@ export class RestaurantService {
         editDishInput: EditDishInput
     ): Promise<EditDishOutput> {
         try {
-            const dish = await this.dishes.findOne(editDishInput.dishId,{relations:['restaurant']});
+            const dish = await this.dishes.findOne(editDishInput.dishId, { relations: ['restaurant'] });
             if (!dish) {
                 return {
                     ok: false,
@@ -337,11 +364,11 @@ export class RestaurantService {
             if (owner.id !== dish.restaurant.ownerId) {
                 return {
                     ok: false,
-                    error: "You can't do that." 
+                    error: "You can't do that."
                 };
             }
             await this.dishes.save([
-                { 
+                {
                     id: editDishInput.dishId,
                     ...editDishInput,
                 }
@@ -360,10 +387,10 @@ export class RestaurantService {
 
     async deleteDish(
         owner: User,
-        {dishId}: DeleteDishInput
+        { dishId }: DeleteDishInput
     ): Promise<DeleteDishOutput> {
         try {
-            const dish = await this.dishes.findOne(dishId, {relations:['restaurant']});
+            const dish = await this.dishes.findOne(dishId, { relations: ['restaurant'] });
             if (!dish) {
                 return {
                     ok: false,
@@ -373,9 +400,9 @@ export class RestaurantService {
             if (owner.id !== dish.restaurant.ownerId) {
                 return {
                     ok: false,
-                    error: "You can't do that." 
+                    error: "You can't do that."
                 };
-            }  
+            }
             await this.dishes.delete(dishId);
             return {
                 ok: true,

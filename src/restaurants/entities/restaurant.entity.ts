@@ -16,7 +16,7 @@ export class Restaurant extends CoreEntity {
     @Field(type => String)
     @Column()
     @IsString()
-    @Length(5)
+    @Length(1)
     name: string;
 
     @Field(type => String)
@@ -68,6 +68,9 @@ export class Restaurant extends CoreEntity {
     @Column({ nullable: true })
     promotedUntil?: Date;
 
+    @Field(type => Boolean)
+    @Column({ default: true })
+    isValid: boolean;
 
     // @Field(type => [Payment])
     // @OneToMany(

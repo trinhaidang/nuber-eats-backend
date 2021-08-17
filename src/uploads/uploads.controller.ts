@@ -41,6 +41,8 @@ export class UploadsController {
     @Post('')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file) {
+        console.log(file);
+        console.log(file.originalname);
         return { url: '/images/restaurants/' + file.originalname };
     }
 }
