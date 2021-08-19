@@ -244,7 +244,7 @@ export class RestaurantService {
         try {
             const restaurant = await this.restaurants.findOne(
                 {owner, id},
-                {relations: ['menu', 'category']}
+                {relations: ['menu', 'category', 'orders']}
             );
             return {
                 ok: true,
