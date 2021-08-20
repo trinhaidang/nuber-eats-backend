@@ -22,7 +22,10 @@ export class Jwtmiddleware implements NestMiddleware {
                         req['user'] = user;
                     }
                 }
-            } catch (e) { }
+            } catch (e) {
+                console.log(e);
+            
+            }
         }
         next();
     }

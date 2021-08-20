@@ -98,6 +98,7 @@ export class RestaurantService {
             }]);
             return { ok: true };
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not edit restaurant',
@@ -121,6 +122,7 @@ export class RestaurantService {
             await this.restaurants.delete(restaurantId);
             return { ok: true };
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not delete restaurant',
@@ -147,6 +149,7 @@ export class RestaurantService {
                 totalResults: totalResults || 0,
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not load restaurants',
@@ -172,6 +175,7 @@ export class RestaurantService {
                 restaurant,
             };
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not find restaurant',
@@ -201,6 +205,7 @@ export class RestaurantService {
                 restaurants
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'COuld not search for restaurants',
@@ -233,6 +238,7 @@ export class RestaurantService {
                 totalResults: totalResults || 0,
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not find restaurants.',
@@ -251,6 +257,7 @@ export class RestaurantService {
                 restaurant,
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not find restaurant.',
@@ -268,6 +275,7 @@ export class RestaurantService {
                 categories
             };
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not load categories',
@@ -306,6 +314,7 @@ export class RestaurantService {
                 restaurants
             };
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not load Category'
@@ -344,6 +353,7 @@ export class RestaurantService {
                 ok: true,
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not create dish'
@@ -380,6 +390,7 @@ export class RestaurantService {
                 ok: true,
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not edit dish'
@@ -411,6 +422,7 @@ export class RestaurantService {
                 ok: true,
             }
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not delete dish'

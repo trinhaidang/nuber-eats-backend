@@ -10,6 +10,9 @@ class CreateOrderItemInput {
     @Field(type => [OrderItemOption], { nullable: true })
     options?: OrderItemOption[];
 
+    @Field(type => Int, {defaultValue:1})
+    quantity?: number;
+
 }
 
 @InputType()

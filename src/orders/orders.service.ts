@@ -13,6 +13,7 @@ import { EditOrderInput, EditOrderOutput } from "./dtos/edit-order.dto";
 import { NEW_COOKED_ORDER, NEW_ORDER_UPDATE, NEW_PENDING_ORDER, PUB_SUB } from "src/common/common.constants";
 import { PubSub } from "graphql-subscriptions";
 import { TakeOrderInput, TakeOrderOutput } from "./dtos/take-order.dto";
+import { setItemPrice } from "src/common/utilities/service-utils";
 
 
 @Injectable()
@@ -129,7 +130,7 @@ export class OrderService {
                     }
 
                 }
-                orderFinalPrice = orderFinalPrice + dishFinalPrice;
+                orderFinalPrice = orderFinalPrice + dishFinalPrice*item.quantity;
 
                 // create item
                 const orderItem = await this.orderItems.save(this.orderItems.create({
@@ -205,6 +206,7 @@ export class OrderService {
             };
 
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not get orders',
@@ -215,7 +217,7 @@ export class OrderService {
     async getOrder(user: User, { id: orderId }: GetOrderInput): Promise<GetOrderOutput> {
         try {
             //const order = await this.orders.findOne(orderId, { relations: ['restaurant']});  //restaurant not eager -> has to load relations
-            const order = await this.orders.findOne(orderId)
+            const order = await this.orders.findOne(orderId);
             if (!order) {
                 return {
                     ok: false,
@@ -237,12 +239,31 @@ export class OrderService {
                 };
             }
 
+            // map dish to each order item
+            order.items.map((item) => setItemPrice(item));
+            // const orderItems = await this.orderItems.findByIds(orderItemIds, {relations:['dish']});
+            // console.log(orderItems.map(item => item.dish));
+            // orderItems.map(mapItem => {
+            //     order.items.map(item => {
+            //         if(item.id === mapItem.id) {
+            //             item.dish = mapItem.dish;
+            //             // set itemPrice
+            //             let optionPrice = 0;
+            //             let optionNames = mapItem.options?.map(option => option.name);
+            //             const chosenOptions = item.dish.options?.filter(option => optionNames.includes(option.name) )
+            //             chosenOptions?.map(option => optionPrice = optionPrice + option.extra);
+            //             item.itemPrice = item.dish.price + optionPrice;
+            //         }
+            //     })
+            // })
+
             return {
                 ok: true,
                 order
             };
 
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not get order',
@@ -282,6 +303,10 @@ export class OrderService {
                             );
                         }
                     }
+                    //add dish
+                    if(newOrder) {
+                        newOrder.items.map(item => setItemPrice(item));
+                    }
                     await this.pubSub.publish(NEW_ORDER_UPDATE, { orderUpdates: newOrder });
                     return {
                         ok: true
@@ -294,6 +319,7 @@ export class OrderService {
             };
 
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not edit order.',
@@ -336,6 +362,7 @@ export class OrderService {
             };
 
         } catch (error) {
+            console.log(error);
             return {
                 ok: false,
                 error: 'Could not take order'
