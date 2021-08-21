@@ -52,28 +52,31 @@ import { UploadsModule } from './uploads/uploads.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging: 
-        process.env.NODE_ENV !== 'prod' 
+      ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : false,
+      logging:
+        process.env.NODE_ENV !== 'prod'
         && process.env.NODE_ENV !== 'test',
       entities: [
-        User, 
-        Verification, 
-        Restaurant, 
-        Category, 
-        Dish, 
-        Order, 
+        User,
+        Verification,
+        Restaurant,
+        Category,
+        Dish,
+        Order,
         OrderItem,
         Payment,
       ]
     }),
     GraphQLModule.forRoot({
       playground: process.env.NODE_ENV !== 'production',
-      installSubscriptionHandlers:true,
+      installSubscriptionHandlers: true,
       autoSchemaFile: true,
       context: ({ req, connection }) => {
         const TOKEN_KEY = 'x-jwt';
-        return { 
-          token: req ? req.headers[TOKEN_KEY] : connection.context[TOKEN_KEY], 
+        return {
+          token: req ? req.headers[TOKEN_KEY] : connection.context[TOKEN_KEY],
         };   // return to gqlContext && middleware
       },
     }),
@@ -107,4 +110,4 @@ import { UploadsModule } from './uploads/uploads.module';
 //   }
 // }
 
-export class AppModule {}
+export class AppModule { }
