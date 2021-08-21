@@ -12,6 +12,8 @@ export enum UserRole {
     Client = 'Client',
     Owner = 'Owner',
     Delivery = 'Delivery',
+    Any = 'Any',
+    Admin = 'Admin'
 }
 
 registerEnumType(UserRole, { name: 'UserRole' })

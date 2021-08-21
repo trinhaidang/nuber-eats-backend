@@ -1,7 +1,7 @@
 import { Args, Mutation, Resolver, Query, Subscription } from "@nestjs/graphql";
 import { AuthUser } from "src/auth/auth-user.decorator";
 import { Role } from "src/auth/role.decorator";
-import { User } from "src/users/entities/user.entity";
+import { User, UserRole } from "src/users/entities/user.entity";
 import { CreateOrderInput, CreateOrderOutput } from "./dtos/create-order.dto";
 import { EditOrderInput, EditOrderOutput } from "./dtos/edit-order.dto";
 import { GetOrderInput, GetOrderOutput } from "./dtos/get-order.dto";
@@ -24,7 +24,7 @@ export class OrderResolver {
     ) { }
 
     @Mutation(returns => CreateOrderOutput)
-    @Role(['Client'])
+    @Role([UserRole.Client])
     createOrder(
         @AuthUser() customer: User,
         @Args('input') createOrderInput: CreateOrderInput
@@ -33,7 +33,7 @@ export class OrderResolver {
     }
 
     @Query(type => GetOrdersOutput)
-    @Role(['Any'])
+    @Role([UserRole.Any])
     getOrders(
         @AuthUser() user: User,
         @Args('input') getOrdersInput: GetOrdersInput
@@ -42,7 +42,7 @@ export class OrderResolver {
     }
 
     @Query(type => GetOrderOutput)
-    @Role(['Any'])
+    @Role([UserRole.Any])
     getOrder(
         @AuthUser() user: User,
         @Args('input') getOrderInput: GetOrderInput
@@ -51,7 +51,7 @@ export class OrderResolver {
     }
 
     @Mutation(returns => EditOrderOutput)
-    @Role(['Any'])
+    @Role([UserRole.Any])
     async editOrder(
         @AuthUser() user: User,
         @Args('input') editOrderInput: EditOrderInput
@@ -76,13 +76,13 @@ export class OrderResolver {
         },
         resolve: ({ pendingOrders: { order } }) => order,
     })
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     pendingOrders() {
         return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
     }
 
     @Subscription(returns => Order)
-    @Role(['Delivery'])
+    @Role([UserRole.Delivery])
     cookedOrders() {
         return this.pubSub.asyncIterator(NEW_COOKED_ORDER);
     }
@@ -100,13 +100,13 @@ export class OrderResolver {
             return order.id === input.id;
         }
     })
-    @Role(['Any'])
+    @Role([UserRole.Any])
     orderUpdates(@Args('input') orderUpdatesInput: OrderUpdatesInput) {
         return this.pubSub.asyncIterator(NEW_ORDER_UPDATE);
     }
 
     @Mutation(returns => TakeOrderOutput)
-    @Role(['Delivery'])
+    @Role([UserRole.Delivery])
     takeOrder(
         @AuthUser() driver: User,
         @Args('input') takeOrderInput: TakeOrderInput

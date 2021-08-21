@@ -1,7 +1,7 @@
 import { Args, Int, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
 import { AuthUser } from "src/auth/auth-user.decorator";
 import { Role } from "src/auth/role.decorator";
-import { User } from "src/users/entities/user.entity";
+import { User, UserRole } from "src/users/entities/user.entity";
 import { AllCategoriesOutput } from "./dtos/category/all-categories.dto";
 import { CategoryInput, CategoryOutput } from "./dtos/category/category.dto";
 import { CreateDishInput, CreateDishOutput } from "./dtos/dish/create-dish.dto";
@@ -27,7 +27,7 @@ export class RestaurantResolver {
 
     @Mutation(returns => CreateRestaurantOutput)
     // @SetMetadata("role", UserRole.Owner)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     async createRestaurant(
         @AuthUser() owner: User,
         @Args('input') createRestaurantInput: CreateRestaurantInput
@@ -39,7 +39,7 @@ export class RestaurantResolver {
     }
 
     @Mutation(returns => EditRestaurantOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     editRestaurant(
         @AuthUser() owner: User,
         @Args('input') editRestaurantInput: EditRestaurantInput
@@ -51,7 +51,7 @@ export class RestaurantResolver {
     }
 
     @Mutation(returns => DeleteRestaurantOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     deleteRestaurant(
         @AuthUser() owner: User,
         @Args('input') deleteRestaurantInput: DeleteRestaurantInput
@@ -86,7 +86,7 @@ export class RestaurantResolver {
     //  -------- OWNER 
 
     @Query(returns => MyRestaurantsOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     myRestaurants(
         @AuthUser() owner: User,
         @Args('input') myRestaurantsInput: MyRestaurantsInput
@@ -95,7 +95,7 @@ export class RestaurantResolver {
     }
 
     @Query(returns => MyRestaurantOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     myRestaurant(
         @AuthUser() owner: User,
         @Args('input') myRestaurantInput: MyRestaurantInput
@@ -141,7 +141,7 @@ export class DishResolver {
     constructor(private readonly restaurantService: RestaurantService) { }
 
     @Mutation(type => CreateDishOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     createDish(
         @AuthUser() owner: User,
         @Args('input') createDishInput: CreateDishInput
@@ -150,7 +150,7 @@ export class DishResolver {
     }
 
     @Mutation(type => EditDishOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     editDish(
         @AuthUser() owner: User,
         @Args('input') editDishInput: EditDishInput
@@ -159,7 +159,7 @@ export class DishResolver {
     }
 
     @Mutation(type => DeleteDishOutput)
-    @Role(['Owner'])
+    @Role([UserRole.Owner])
     deleteDish(
         @AuthUser() owner: User,
         @Args('input') deleteDishInput: DeleteDishInput

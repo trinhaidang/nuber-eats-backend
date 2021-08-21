@@ -147,6 +147,10 @@ export class OrderService {
                 total: orderFinalPrice,
                 items: orderItems,
             }));
+            //add dish
+            if(order) {
+                order.items.map(item => setItemPrice(item));
+            }
             await this.pubSub.publish(
                 NEW_PENDING_ORDER,
                 { pendingOrders: { order, ownerId: restaurant.ownerId } }
@@ -295,6 +299,10 @@ export class OrderService {
                         status,
                     });
                     const newOrder = { ...order, status };
+                    //add dish
+                    if(newOrder) {
+                        newOrder.items.map(item => setItemPrice(item));
+                    }
                     if (user.role === UserRole.Owner) {
                         if (status === OrderStatus.Cooked) {
                             await this.pubSub.publish(
@@ -302,10 +310,6 @@ export class OrderService {
                                 { cookedOrders: newOrder }
                             );
                         }
-                    }
-                    //add dish
-                    if(newOrder) {
-                        newOrder.items.map(item => setItemPrice(item));
                     }
                     await this.pubSub.publish(NEW_ORDER_UPDATE, { orderUpdates: newOrder });
                     return {
@@ -353,6 +357,10 @@ export class OrderService {
                 id: orderId,
                 driver,
             })
+            //add dish
+            if(order) {
+                order.items.map(item => setItemPrice(item));
+            }
             await this.pubSub.publish(
                 NEW_ORDER_UPDATE,
                 { orderUpdates: { ...order, driver } }
