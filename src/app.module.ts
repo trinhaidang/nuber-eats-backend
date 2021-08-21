@@ -33,11 +33,11 @@ import { UploadsModule } from './uploads/uploads.module';
         NODE_ENV: Joi.string()
           .valid('dev', 'production', 'test')
           .required(),
-        DB_HOST: Joi.string().required(),
-        DB_PORT: Joi.string().required(),
-        DB_USERNAME: Joi.string().required(),
-        DB_PASSWORD: Joi.string().required(),
-        DB_NAME: Joi.string().required(),
+        DB_HOST: Joi.string(),
+        DB_PORT: Joi.string(),
+        DB_USERNAME: Joi.string(),
+        DB_PASSWORD: Joi.string(),
+        DB_NAME: Joi.string(),
         PRIVATE_KEY: Joi.string().required(),
         MAILGUN_API_KEY: Joi.string().required(),
         MAILGUN_FROM_EMAIL: Joi.string().required(),
@@ -46,11 +46,15 @@ import { UploadsModule } from './uploads/uploads.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      ...(process.env.DATABASE_URL
+        ? { url: process.env.DATABASE_URL }
+        : {
+          host: process.env.DB_HOST,
+          port: +process.env.DB_PORT,
+          username: process.env.DB_USERNAME,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_NAME,
+        }),
       synchronize: process.env.NODE_ENV !== 'prod',
       ssl: process.env.NODE_ENV === 'production'
         ? { rejectUnauthorized: false }
@@ -70,7 +74,7 @@ import { UploadsModule } from './uploads/uploads.module';
       ]
     }),
     GraphQLModule.forRoot({
-      playground: process.env.NODE_ENV !== 'production',
+      // playground: process.env.NODE_ENV !== 'production',
       installSubscriptionHandlers: true,
       autoSchemaFile: true,
       context: ({ req, connection }) => {
